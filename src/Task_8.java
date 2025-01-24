@@ -11,7 +11,7 @@ public class Task_8 {
 
         StringBuilder taskText = new StringBuilder(" Кубы первых десяти положительных чисел: \n");
 
-        for (int i = 1; i < 11; i += 1){
+        for (int i = 1; i < 11; i++){
             int result = i * i * i;
             taskText.append(i).append("^3 = ").append(result).append("\n");
         }
