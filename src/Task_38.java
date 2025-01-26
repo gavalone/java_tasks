@@ -1,70 +1,82 @@
-class User {
-    protected String name;
-    protected int age;
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getAge() {
-        return age;
-    }
-}
-
-class Worker extends User {
-    private double salary;
-
-    public void setSalary(double salary) {
-        this.salary = salary;
-    }
-
-    public double getSalary() {
-        return salary;
-    }
-}
-
-class Student extends User {
-    private double grant;
-    private int course;
-
-    public void setGrant(double grant) {
-        this.grant = grant;
-    }
-
-    public double getGrant() {
-        return grant;
-    }
-
-    public void setCourse(int course) {
-        this.course = course;
-    }
-
-    public int getCourse() {
-        return course;
-    }
-}
+// 38. Разработать программу шифровки-дешифровки
+// по алгоритму AES-128. Данные берутся из файла,
+// зашифрованные данные сохраняются в указанный файл.
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class Task_38 {
+
+    private static final String ALGORITHM = "AES";
+    private static final int KEY_SIZE = 128;
+
     public static void main(String[] args) {
-        Worker ivan = new Worker();
-        ivan.setName("Иван");
-        ivan.setAge(25);
-        ivan.setSalary(1000);
+        String inputFile = "input.txt"; // Пути к файлам
+        String encryptedFile = "encrypted.txt";
+        String decryptedFile = "decrypted.txt";
 
-        Worker vasya = new Worker();
-        vasya.setName("Вася");
-        vasya.setAge(26);
-        vasya.setSalary(2000);
+        try {
+            // Создание тестового входного файла с текстом для шифрования
+            createTestFile(inputFile);
+            // Генерация ключа
+            SecretKey secretKey = generateKey();
+            // Шифрование данных из файла
+            byte[] encryptedData = encryptFile(inputFile, secretKey);
+            writeFile(encryptedFile, encryptedData);
+            System.out.println("Файл успешно зашифрован: " + encryptedFile);
+            // Дешифрование данных из файла
+            byte[] decryptedData = decryptData(encryptedData, secretKey);
+            writeFile(decryptedFile, decryptedData);
+            System.out.println("Файл успешно расшифрован: " + decryptedFile);
+            // Вывод содержимого расшифрованного файла
+            System.out.println("Содержимое расшифрованного файла:");
+            System.out.println(new String(decryptedData));
 
-        double total = ivan.getSalary() + vasya.getSalary();
-        System.out.println("Сумма зарплат Ивана и Васи: " + total);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Создание тестового файла
+    private static void createTestFile(String filePath) throws IOException {
+        try (FileWriter writer = new FileWriter(filePath)) {
+            writer.write("Тестовая строка для шифрования.");
+        }
+    }
+
+    // Генерация ключа AES
+    private static SecretKey generateKey() throws Exception {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(ALGORITHM);
+        keyGenerator.init(KEY_SIZE);
+        return keyGenerator.generateKey();
+    }
+
+    // Шифрование данных из файла
+    private static byte[] encryptFile(String filePath, SecretKey secretKey) throws Exception {
+        byte[] fileContent = readFile(filePath);
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+        return cipher.doFinal(fileContent);
+    }
+
+    // Дешифрование данных
+    private static byte[] decryptData(byte[] encryptedData, SecretKey secretKey) throws Exception {
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        return cipher.doFinal(encryptedData);
+    }
+
+    // Чтение данных из файла
+    private static byte[] readFile(String filePath) throws IOException {
+        return Files.readAllBytes(Paths.get(filePath));
+    }
+
+    // Запись данных в файл
+    private static void writeFile(String filePath, byte[] data) throws IOException {
+        Files.write(Paths.get(filePath), data);
     }
 }
+
